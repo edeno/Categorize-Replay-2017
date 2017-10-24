@@ -1,0 +1,13 @@
+name: Categorize_Replay_2017
+channels:
+- edeno
+- defaults
+dependencies:
+- python=3.5
+- loren_frank_data_processing
+- replay_classification
+- jupyter
+- setuptools
+- pytest
+- pytest-cov
+- coveralls
