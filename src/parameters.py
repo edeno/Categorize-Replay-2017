@@ -21,6 +21,3 @@ ANIMALS = {
     'Cor': Animal(directory=join(RAW_DATA_DIR, 'CorrianderData'),
                   short_name='Cor'),
 }
-
-REPLAY_COVARIATES = ['session_time', 'replay_task',
-                     'replay_order', 'replay_motion']
