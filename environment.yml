@@ -3,12 +3,12 @@ channels:
 - edeno
 - defaults
 dependencies:
-- python=3.5
+- "python >= 3.5"
 - loren_frank_data_processing
 - ripple_detection
 - replay_classification
 - jupyter
 - setuptools
-- pytest
+- "pytest >= 2.7.1"
 - pytest-cov
 - coveralls
