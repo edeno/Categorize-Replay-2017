@@ -4,11 +4,10 @@ from signal import SIGUSR1, SIGUSR2, signal
 from subprocess import PIPE, run
 from sys import exit, stdout
 
-from src.analysis import (decode_ripple_clusterless,
-                          detect_epoch_ripples)
-from src.data_processing import (save_xarray,
-                                 get_interpolated_position_dataframe)
-from src.parameters import (ANIMALS, SAMPLING_FREQUENCY, PROCESSED_DATA_DIR)
+from loren_frank_data_processing import (get_interpolated_position_dataframe,
+                                         save_xarray)
+from src.analysis import decode_ripple_clusterless, detect_epoch_ripples
+from src.parameters import ANIMALS, PROCESSED_DATA_DIR, SAMPLING_FREQUENCY
 
 
 def decode_ripples(epoch_key):
@@ -29,7 +28,7 @@ def decode_ripples(epoch_key):
     results['posterior_density'] = posterior_density
 
     for group_name, data in results.items():
-        save_xarray(epoch_key, data, group_name)
+        save_xarray(PROCESSED_DATA_DIR, epoch_key, data, group_name)
 
 
 def get_command_line_arguments():
