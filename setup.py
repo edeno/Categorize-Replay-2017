@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 INSTALL_REQUIRES = ['numpy >= 1.11', 'pandas >= 0.18.0', 'scipy', 'xarray',
                     'matplotlib', 'replay_classification',
-                    'loren_frank_data_processing']
+                    'loren_frank_data_processing', 'ripple_detection']
 TESTS_REQUIRE = ['pytest >= 2.7.1']
 
 setup(
