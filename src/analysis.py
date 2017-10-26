@@ -9,8 +9,7 @@ from loren_frank_data_processing import (get_interpolated_position_dataframe,
                                          get_LFP_dataframe,
                                          get_multiunit_indicator_dataframe,
                                          make_tetrode_dataframe,
-                                         reshape_to_segments,
-                                         get_trial_time)
+                                         reshape_to_segments)
 from replay_classification import ClusterlessDecoder
 from ripple_detection import Kay_ripple_detector
 
