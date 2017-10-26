@@ -9,7 +9,8 @@ from loren_frank_data_processing import (get_interpolated_position_dataframe,
                                          get_LFP_dataframe,
                                          get_multiunit_indicator_dataframe,
                                          make_tetrode_dataframe,
-                                         reshape_to_segments)
+                                         reshape_to_segments,
+                                         get_trial_time)
 from replay_classification import ClusterlessDecoder
 from ripple_detection import Kay_ripple_detector
 
@@ -19,17 +20,14 @@ _MARKS = ['channel_1_max', 'channel_2_max', 'channel_3_max',
           'channel_4_max']
 
 
-def detect_epoch_ripples(epoch_key, animals, sampling_frequency):
+def detect_epoch_ripples(epoch_key, animals):
     '''Returns a list of tuples containing the start and end times of
     ripples. Candidate ripples are computed via the ripple detection
     function and then filtered to exclude ripples where the animal was
     still moving.
     '''
     logger.info('Detecting ripples')
-
-    speed = get_interpolated_position_dataframe(
-        epoch_key, animals).speed
-    time = speed.index
+    SAMPLING_FREQUENCY = 1000
 
     tetrode_info = make_tetrode_dataframe(animals).xs(
             epoch_key, drop_level=False)
@@ -42,11 +40,26 @@ def detect_epoch_ripples(epoch_key, animals, sampling_frequency):
     tetrode_keys = tetrode_info[is_hippocampal].index.tolist()
     hippocampus_lfps = pd.concat(
         [get_LFP_dataframe(tetrode_key, animals)
-         for tetrode_key in tetrode_keys], axis=1).reindex(time)
+         for tetrode_key in tetrode_keys], axis=1)
+    hippocampus_lfps = hippocampus_lfps.resample('ms').mean()
+    time = hippocampus_lfps.index
+
+    def _time_function(epoch_key, animals):
+        return time
+
+    speed = get_interpolated_position_dataframe(
+        epoch_key, animals, _time_function).speed
 
     return Kay_ripple_detector(
-        time.values, hippocampus_lfps.values, speed.values, sampling_frequency,
-        minimum_duration=pd.Timedelta(seconds=0.015))
+        time, hippocampus_lfps.values, speed.values, SAMPLING_FREQUENCY,
+        minimum_duration=pd.Timedelta(milliseconds=15))
+
+
+def get_millisecond_time(epoch_key, animals):
+    '''Convert time to milliseconds'''
+    time = get_trial_time(epoch_key, animals)
+    return pd.TimedeltaIndex(start=time.min(), end=time.max(), freq='ms',
+                             name='time')
 
 
 def decode_ripple_clusterless(epoch_key, animals, ripple_times,
