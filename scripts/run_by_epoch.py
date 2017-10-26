@@ -17,7 +17,8 @@ def decode_ripples(epoch_key):
 
     # Compare different types of ripples
     replay_info, state_probability, posterior_density = (
-        decode_ripple_clusterless(epoch_key, ANIMALS, ripple_times))
+        decode_ripple_clusterless(epoch_key, ANIMALS, ripple_times,
+                                  mark_names=None))
 
     position_info = get_interpolated_position_dataframe(epoch_key, ANIMALS)
 
