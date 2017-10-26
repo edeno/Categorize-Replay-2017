@@ -20,14 +20,13 @@ _MARKS = ['channel_1_max', 'channel_2_max', 'channel_3_max',
           'channel_4_max']
 
 
-def detect_epoch_ripples(epoch_key, animals):
+def detect_epoch_ripples(epoch_key, animals, sampling_frequency):
     '''Returns a list of tuples containing the start and end times of
     ripples. Candidate ripples are computed via the ripple detection
     function and then filtered to exclude ripples where the animal was
     still moving.
     '''
     logger.info('Detecting ripples')
-    SAMPLING_FREQUENCY = 1000
 
     tetrode_info = make_tetrode_dataframe(animals).xs(
             epoch_key, drop_level=False)
@@ -41,7 +40,6 @@ def detect_epoch_ripples(epoch_key, animals):
     hippocampus_lfps = pd.concat(
         [get_LFP_dataframe(tetrode_key, animals)
          for tetrode_key in tetrode_keys], axis=1)
-    hippocampus_lfps = hippocampus_lfps.resample('ms').mean()
     time = hippocampus_lfps.index
 
     def _time_function(epoch_key, animals):
@@ -51,15 +49,8 @@ def detect_epoch_ripples(epoch_key, animals):
         epoch_key, animals, _time_function).speed
 
     return Kay_ripple_detector(
-        time, hippocampus_lfps.values, speed.values, SAMPLING_FREQUENCY,
+        time, hippocampus_lfps.values, speed.values, sampling_frequency,
         minimum_duration=pd.Timedelta(milliseconds=15))
-
-
-def get_millisecond_time(epoch_key, animals):
-    '''Convert time to milliseconds'''
-    time = get_trial_time(epoch_key, animals)
-    return pd.TimedeltaIndex(start=time.min(), end=time.max(), freq='ms',
-                             name='time')
 
 
 def decode_ripple_clusterless(epoch_key, animals, ripple_times,
