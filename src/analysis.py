@@ -62,11 +62,8 @@ def decode_ripple_clusterless(epoch_key, animals, ripple_times,
                               mark_names=_MARKS,
                               brain_areas=_BRAIN_AREAS):
     logger.info('Decoding ripples')
-    tetrode_info = (
-        make_tetrode_dataframe(animals)
-        .loc[epoch_key]
-        .set_index(['animal', 'day', 'epoch', 'tetrode_number'],
-                   drop=False))
+    tetrode_info = make_tetrode_dataframe(animals).xs(
+        epoch_key, drop_level=False)
     is_hippocampal = tetrode_info.area.isin(brain_areas)
     hippocampal_tetrodes = tetrode_info[
         is_hippocampal &
