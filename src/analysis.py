@@ -17,9 +17,11 @@ logger = getLogger(__name__)
 
 _MARKS = ['channel_1_max', 'channel_2_max', 'channel_3_max',
           'channel_4_max']
+_BRAIN_AREAS = ['CA1', 'iCA1', 'CA3']
 
 
-def detect_epoch_ripples(epoch_key, animals, sampling_frequency):
+def detect_epoch_ripples(epoch_key, animals, sampling_frequency,
+                         brain_areas=_BRAIN_AREAS):
     '''Returns a list of tuples containing the start and end times of
     ripples. Candidate ripples are computed via the ripple detection
     function and then filtered to exclude ripples where the animal was
@@ -30,7 +32,7 @@ def detect_epoch_ripples(epoch_key, animals, sampling_frequency):
     tetrode_info = make_tetrode_dataframe(animals).xs(
             epoch_key, drop_level=False)
     # Get cell-layer CA1, iCA1 LFPs
-    is_hippocampal = (tetrode_info.area.isin(['CA1', 'iCA1', 'CA3']) &
+    is_hippocampal = (tetrode_info.area.isin(brain_areas) &
                       (tetrode_info.descrip.isin(['riptet']) |
                        tetrode_info.validripple))
     logger.debug(tetrode_info[is_hippocampal]
@@ -57,14 +59,15 @@ def decode_ripple_clusterless(epoch_key, animals, ripple_times,
                               n_place_bins=61,
                               place_std_deviation=None,
                               mark_std_deviation=20,
-                              mark_names=_MARKS):
+                              mark_names=_MARKS,
+                              brain_areas=_BRAIN_AREAS):
     logger.info('Decoding ripples')
     tetrode_info = (
         make_tetrode_dataframe(animals)
         .loc[epoch_key]
         .set_index(['animal', 'day', 'epoch', 'tetrode_number'],
                    drop=False))
-    is_hippocampal = tetrode_info.area.isin(['CA1', 'iCA1', 'CA3'])
+    is_hippocampal = tetrode_info.area.isin(brain_areas)
     hippocampal_tetrodes = tetrode_info[
         is_hippocampal &
         ~tetrode_info.descrip.str.endswith('Ref').fillna(False) &
