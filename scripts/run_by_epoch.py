@@ -5,13 +5,12 @@ from subprocess import PIPE, run
 from sys import exit, stdout
 
 from loren_frank_data_processing import (get_interpolated_position_dataframe,
-                                         save_xarray)
+                                         save_xarray, make_tetrode_dataframe)
 from src.analysis import decode_ripple_clusterless, detect_epoch_ripples
 from src.parameters import ANIMALS, PROCESSED_DATA_DIR, SAMPLING_FREQUENCY
 
 
 def decode_ripples(epoch_key):
-
     ripple_times = detect_epoch_ripples(
         epoch_key, ANIMALS, sampling_frequency=SAMPLING_FREQUENCY)
 
@@ -30,6 +29,53 @@ def decode_ripples(epoch_key):
 
     for group_name, data in results.items():
         save_xarray(PROCESSED_DATA_DIR, epoch_key, data, group_name)
+
+
+def decode_replay_by_brain_area(epoch_key):
+    tetrode_info = make_tetrode_dataframe(ANIMALS).xs(
+        epoch_key, drop_level=False)
+    for brain_area in tetrode_info.area.unique().tolist():
+        ripple_times = detect_epoch_ripples(
+            epoch_key, ANIMALS, sampling_frequency=SAMPLING_FREQUENCY,
+            brain_areas=brain_area)
+
+        # Compare different types of ripples
+        replay_info, state_probability, posterior_density = (
+            decode_ripple_clusterless(epoch_key, ANIMALS, ripple_times,
+                                      mark_names=None, brain_areas=brain_area))
+
+        results = dict()
+        results[brain_area + '/replay_info'] = (replay_info.reset_index()
+                                                .to_xarray())
+        results[brain_area + '/state_probability'] = state_probability
+        results[brain_area + '/posterior_density'] = posterior_density
+
+        for group_name, data in results.items():
+            save_xarray(PROCESSED_DATA_DIR, epoch_key, data, group_name)
+
+
+def decode_replay_during_hippocampus_ripple(epoch_key):
+    tetrode_info = make_tetrode_dataframe(ANIMALS).xs(
+        epoch_key, drop_level=False)
+    ripple_times = detect_epoch_ripples(
+        epoch_key, ANIMALS, sampling_frequency=SAMPLING_FREQUENCY,
+        brain_areas=['CA1', 'iCA1', 'CA3'])
+
+    for brain_area in tetrode_info.area.unique().tolist():
+
+        # Compare different types of ripples
+        replay_info, state_probability, posterior_density = (
+            decode_ripple_clusterless(epoch_key, ANIMALS, ripple_times,
+                                      mark_names=None, brain_areas=brain_area))
+
+        results = dict()
+        name = 'hippocampal_ripple/' + brain_area
+        results[name + '/replay_info'] = replay_info.reset_index().to_xarray()
+        results[name + '/state_probability'] = state_probability
+        results[name + '/posterior_density'] = posterior_density
+
+        for group_name, data in results.items():
+            save_xarray(PROCESSED_DATA_DIR, epoch_key, data, group_name)
 
 
 def get_command_line_arguments():
