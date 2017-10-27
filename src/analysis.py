@@ -32,12 +32,12 @@ def detect_epoch_ripples(epoch_key, animals, sampling_frequency,
     tetrode_info = make_tetrode_dataframe(animals).xs(
             epoch_key, drop_level=False)
     # Get cell-layer CA1, iCA1 LFPs
-    is_hippocampal = (tetrode_info.area.isin(brain_areas) &
+    is_brain_areas = (tetrode_info.area.isin(brain_areas) &
                       (tetrode_info.descrip.isin(['riptet']) |
                        tetrode_info.validripple))
-    logger.debug(tetrode_info[is_hippocampal]
+    logger.debug(tetrode_info[is_brain_areas]
                  .loc[:, ['area', 'depth', 'descrip']])
-    tetrode_keys = tetrode_info[is_hippocampal].index.tolist()
+    tetrode_keys = tetrode_info[is_brain_areas].index.tolist()
     hippocampus_lfps = pd.concat(
         [get_LFP_dataframe(tetrode_key, animals)
          for tetrode_key in tetrode_keys], axis=1)
@@ -64,25 +64,25 @@ def decode_ripple_clusterless(epoch_key, animals, ripple_times,
     logger.info('Decoding ripples')
     tetrode_info = make_tetrode_dataframe(animals).xs(
         epoch_key, drop_level=False)
-    is_hippocampal = tetrode_info.area.isin(brain_areas)
-    hippocampal_tetrodes = tetrode_info[
-        is_hippocampal &
+    is_brain_areas = tetrode_info.area.isin(brain_areas)
+    brain_areas_tetrodes = tetrode_info[
+        is_brain_areas &
         ~tetrode_info.descrip.str.endswith('Ref').fillna(False) &
         ~tetrode_info.descrip.str.startswith('Ref').fillna(False)]
-    logger.debug(hippocampal_tetrodes.loc[:, ['area', 'depth', 'descrip']])
+    logger.debug(brain_areas_tetrodes.loc[:, ['area', 'depth', 'descrip']])
 
     position_info = get_interpolated_position_dataframe(epoch_key, animals)
 
     if mark_names is None:
         # Use all available mark dimensions
         mark_names = get_multiunit_indicator_dataframe(
-            hippocampal_tetrodes.index[0], animals).columns.tolist()
+            brain_areas_tetrodes.index[0], animals).columns.tolist()
         mark_names = [mark_name for mark_name in mark_names
                       if mark_name not in ['x_position', 'y_position']]
 
     marks = [(get_multiunit_indicator_dataframe(tetrode_key, animals)
               .loc[:, mark_names])
-             for tetrode_key in hippocampal_tetrodes.index]
+             for tetrode_key in brain_areas_tetrodes.index]
     marks = [tetrode_marks for tetrode_marks in marks
              if (tetrode_marks.loc[position_info.speed > 4, :].dropna()
                  .shape[0]) != 0]
