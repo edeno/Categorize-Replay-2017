@@ -41,8 +41,9 @@ def decode_replay_by_brain_area(epoch_key):
 
         # Compare different types of ripples
         replay_info, state_probability, posterior_density = (
-            decode_ripple_clusterless(epoch_key, ANIMALS, ripple_times,
-                                      mark_names=None, brain_areas=brain_area))
+            decode_ripple_clusterless(
+                epoch_key, ANIMALS, ripple_times, mark_names=None,
+                brain_areas=[brain_area]))
 
         results = dict()
         results[brain_area + '/replay_info'] = (replay_info.reset_index()
@@ -65,8 +66,9 @@ def decode_replay_during_hippocampus_ripple(epoch_key):
 
         # Compare different types of ripples
         replay_info, state_probability, posterior_density = (
-            decode_ripple_clusterless(epoch_key, ANIMALS, ripple_times,
-                                      mark_names=None, brain_areas=brain_area))
+            decode_ripple_clusterless(
+                epoch_key, ANIMALS, ripple_times, mark_names=None,
+                brain_areas=[brain_area]))
 
         results = dict()
         name = 'hippocampal_ripple/' + brain_area
