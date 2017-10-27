@@ -34,7 +34,7 @@ def decode_ripples(epoch_key):
 def decode_replay_by_brain_area(epoch_key):
     tetrode_info = make_tetrode_dataframe(ANIMALS).xs(
         epoch_key, drop_level=False)
-    for brain_area in tetrode_info.area.unique().tolist():
+    for brain_area in tetrode_info.area.dropna().unique().tolist():
         try:
             ripple_times = detect_epoch_ripples(
                 epoch_key, ANIMALS, sampling_frequency=SAMPLING_FREQUENCY,
@@ -65,7 +65,7 @@ def decode_replay_during_hippocampus_ripple(epoch_key):
         epoch_key, ANIMALS, sampling_frequency=SAMPLING_FREQUENCY,
         brain_areas=['CA1', 'iCA1', 'CA3'])
 
-    for brain_area in tetrode_info.area.unique().tolist():
+    for brain_area in tetrode_info.area.dropna().unique().tolist():
         try:
             # Compare different types of ripples
             replay_info, state_probability, posterior_density = (
