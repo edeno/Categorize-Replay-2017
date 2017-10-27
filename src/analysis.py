@@ -34,9 +34,10 @@ def detect_epoch_ripples(epoch_key, animals, sampling_frequency,
     # Get cell-layer CA1, iCA1 LFPs
 
     brain_areas = [brain_areas] if isinstance(brain_areas, str) else brain_areas
-    is_brain_areas = (tetrode_info.area.isin(brain_areas) &
-                      (tetrode_info.descrip.isin(['riptet']) |
-                       tetrode_info.validripple))
+    is_brain_areas = tetrode_info.area.isin(brain_areas)
+    if 'CA1' in brain_areas:
+        is_brain_areas = is_brain_areas & (
+            tetrode_info.descrip.isin(['riptet']) | tetrode_info.validripple)
     logger.debug(tetrode_info[is_brain_areas]
                  .loc[:, ['area', 'depth', 'descrip']])
     tetrode_keys = tetrode_info[is_brain_areas].index.tolist()
