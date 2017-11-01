@@ -247,11 +247,7 @@ def _get_replay_motion_from_rows(ripple_times, posterior_density,
     is_away : array of str
 
     '''
-    max_state_ind = int(posterior_density
-                        .dropna('time').sum('position')
-                        .isel(time=-1).argmax())
-    posterior_density = posterior_density.isel(
-        state=max_state_ind).dropna('time')
+    posterior_density = posterior_density.sum('state').dropna('time')
     replay_position = posterior_density.position.values[
         posterior_density.argmax('position').values]
     animal_position = ripple_times[distance_measure]
