@@ -29,7 +29,7 @@ ANIMALS = {
 
 # Colors for plots
 hls = sns.color_palette('hls', 6)
-set1 = sns.color_palette('set1', 4)
+set1 = sns.color_palette('Set2', 4)
 
 COLORS = {
     'Forward': hls[0],
