@@ -34,6 +34,12 @@ def decode_ripples(epoch_key):
 def decode_replay_by_brain_area(epoch_key):
     tetrode_info = make_tetrode_dataframe(ANIMALS).xs(
         epoch_key, drop_level=False)
+
+    results = dict()
+
+    position_info = get_interpolated_position_dataframe(epoch_key, ANIMALS)
+    results['position_info'] = position_info.to_xarray()
+
     for brain_area in tetrode_info.area.dropna().unique().tolist():
         print(brain_area)
         try:
@@ -46,16 +52,16 @@ def decode_replay_by_brain_area(epoch_key):
                     epoch_key, ANIMALS, ripple_times, mark_names=None,
                     brain_areas=brain_area))
 
-            results = dict()
             results[brain_area + '/replay_info'] = (replay_info.reset_index()
                                                     .to_xarray())
             results[brain_area + '/state_probability'] = state_probability
             results[brain_area + '/posterior_density'] = posterior_density
-
-            for group_name, data in results.items():
-                save_xarray(PROCESSED_DATA_DIR, epoch_key, data, group_name)
         except (ValueError, FileNotFoundError):
             continue
+
+    for group_name, data in results.items():
+        save_xarray(PROCESSED_DATA_DIR, epoch_key, data, group_name)
+
 
 
 def decode_replay_during_hippocampus_ripple(epoch_key):
