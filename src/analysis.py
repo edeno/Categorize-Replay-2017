@@ -260,7 +260,7 @@ def _get_replay_motion_from_rows(ripple_times, posterior_density,
     is_away = linregress(
         posterior_density.get_index('time').total_seconds(),
         replay_distance_from_animal_position).slope > 0
-    return np.where(is_away, 'away', 'towards')
+    return np.where(is_away, 'Away', 'Towards')
 
 
 def _get_replay_motion(ripple_times, posterior_density,
