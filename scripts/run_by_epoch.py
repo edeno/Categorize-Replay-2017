@@ -62,7 +62,10 @@ def decode_replay_by_brain_area(epoch_key):
             continue
 
     for group_name, data in results.items():
-        save_xarray(PROCESSED_DATA_DIR, epoch_key, data, group_name)
+        try:
+            save_xarray(PROCESSED_DATA_DIR, epoch_key, data, group_name)
+        except KeyError:
+            continue
 
 
 def decode_replay_during_hippocampus_ripple(epoch_key):
