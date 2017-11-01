@@ -41,7 +41,7 @@ def decode_replay_by_brain_area(epoch_key):
     results['position_info'] = position_info.to_xarray()
 
     for brain_area in tetrode_info.area.dropna().unique().tolist():
-        if brain_area == '???':
+        if brain_area == '???' or brain_area == 'Reference':
             continue
         print(brain_area)
         try:
