@@ -35,6 +35,7 @@ def decode_replay_by_brain_area(epoch_key):
     tetrode_info = make_tetrode_dataframe(ANIMALS).xs(
         epoch_key, drop_level=False)
     for brain_area in tetrode_info.area.dropna().unique().tolist():
+        print(brain_area)
         try:
             ripple_times = detect_epoch_ripples(
                 epoch_key, ANIMALS, sampling_frequency=SAMPLING_FREQUENCY,
