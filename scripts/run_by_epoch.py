@@ -136,7 +136,7 @@ def main():
                    stdout=PIPE, universal_newlines=True).stdout
     logger.info('Git Hash: {git_hash}'.format(git_hash=git_hash.rstrip()))
 
-    decode_ripples(epoch_key)
+    decode_replay_by_brain_area(epoch_key)
 
     logger.info('Finished Processing')
 
