@@ -12,13 +12,12 @@ from src.parameters import ANIMALS, PROCESSED_DATA_DIR, SAMPLING_FREQUENCY
 
 def decode_ripples(epoch_key):
     ripple_times = detect_epoch_ripples(
-        epoch_key, ANIMALS, sampling_frequency=SAMPLING_FREQUENCY,
-        brain_areas='CA1')
+        epoch_key, ANIMALS, sampling_frequency=SAMPLING_FREQUENCY)
 
     # Compare different types of ripples
     replay_info, state_probability, posterior_density = (
         decode_ripple_clusterless(epoch_key, ANIMALS, ripple_times,
-                                  mark_names=None, brain_areas='CA1'))
+                                  mark_names=None))
 
     position_info = get_interpolated_position_dataframe(epoch_key, ANIMALS)
 
