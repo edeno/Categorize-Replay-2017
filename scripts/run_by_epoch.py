@@ -20,8 +20,6 @@ def decode_ripples(epoch_key):
                                   mark_names=None))
 
     position_info = get_interpolated_position_dataframe(epoch_key, ANIMALS)
-    (position_info['animal'], position_info['day'],
-     position_info['epoch']) = epoch_key
 
     results = dict()
     results['replay_info'] = replay_info.reset_index().to_xarray()
