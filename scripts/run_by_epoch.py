@@ -63,7 +63,7 @@ def decode_replay_during_hippocampus_ripple(epoch_key):
         epoch_key, drop_level=False)
     ripple_times = detect_epoch_ripples(
         epoch_key, ANIMALS, sampling_frequency=SAMPLING_FREQUENCY,
-        brain_areas=['CA1', 'iCA1', 'CA3'])
+        brain_areas='CA1')
 
     for brain_area in tetrode_info.area.dropna().unique().tolist():
         try:
