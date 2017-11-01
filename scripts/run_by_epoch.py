@@ -55,8 +55,7 @@ def decode_replay_by_brain_area(epoch_key):
 
             for group_name, data in results.items():
                 save_xarray(PROCESSED_DATA_DIR, epoch_key, data, group_name)
-
-        except ValueError:
+        except (ValueError, FileNotFoundError):
             continue
 
 
