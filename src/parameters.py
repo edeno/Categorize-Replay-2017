@@ -21,3 +21,21 @@ ANIMALS = {
     'Cor': Animal(directory=join(RAW_DATA_DIR, 'CorrianderData'),
                   short_name='Cor'),
 }
+
+# Colors for plots
+hls = sns.color_palette('hls', 6)
+set1 = sns.color_palette('set1', 4)
+
+COLORS = {
+    'Forward': hls[0],
+    'Reverse': hls[1],
+    'Inbound': hls[2],
+    'Outbound': hls[3],
+    'Towards': hls[4],
+    'Away': hls[5],
+    'Unclassified': 'lightgrey',
+    'Inbound-Forward': set1[0],
+    'Inbound-Reverse': set1[1],
+    'Outbound-Forward': set1[2],
+    'Outbound-Reverse': set1[3],
+}
