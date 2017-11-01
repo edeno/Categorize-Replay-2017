@@ -147,6 +147,7 @@ def main():
     logger.info('Git Hash: {git_hash}'.format(git_hash=git_hash.rstrip()))
 
     decode_replay_by_brain_area(epoch_key)
+    decode_replay_during_hippocampus_ripple(epoch_key)
 
     logger.info('Finished Processing')
 
