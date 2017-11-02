@@ -22,7 +22,7 @@ def decode_ripples(epoch_key):
     position_info = get_interpolated_position_dataframe(epoch_key, ANIMALS)
 
     results = dict()
-    results['replay_info'] = replay_info.reset_index().to_xarray()
+    results['replay_info'] = replay_info.to_xarray()
     results['position_info'] = position_info.to_xarray()
     results['state_probability'] = state_probability
     results['posterior_density'] = posterior_density
@@ -53,8 +53,7 @@ def decode_replay_by_brain_area(epoch_key):
                         epoch_key, ANIMALS, ripple_times, mark_names=None,
                         brain_areas=brain_area))
 
-                results[brain_area + '/replay_info'] = (
-                    replay_info.reset_index().to_xarray())
+                results[brain_area + '/replay_info'] = replay_info.to_xarray()
                 results[brain_area + '/state_probability'] = state_probability
                 results[brain_area + '/posterior_density'] = posterior_density
             except (ValueError, FileNotFoundError):
@@ -86,8 +85,7 @@ def decode_replay_during_hippocampus_ripple(epoch_key):
 
                 results = dict()
                 name = 'hippocampal_ripple/' + brain_area
-                results[name + '/replay_info'] = (replay_info.reset_index()
-                                                  .to_xarray())
+                results[name + '/replay_info'] = replay_info.to_xarray()
                 results[name + '/state_probability'] = state_probability
                 results[name + '/posterior_density'] = posterior_density
 
