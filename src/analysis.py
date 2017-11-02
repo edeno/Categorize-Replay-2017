@@ -174,8 +174,9 @@ def summarize_replay_results(results, ripple_times, position_info,
          ), axis=1)
 
     # When in the session does the ripple occur (early, middle, late)
-    replay_info['session_time'] = _ripple_session_time(
-        ripple_times, position_info.index)
+    replay_info['session_time'] = pd.Categorical(
+        _ripple_session_time(ripple_times, position_info.index), ordered=True,
+        categories=['early', 'middle', 'late'])
 
     # Add stats about spikes
     replay_info['number_of_unique_spiking'] = [
