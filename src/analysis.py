@@ -133,6 +133,12 @@ def summarize_replay_results(results, ripple_times, position_info,
     '''
     replay_info = ripple_times.copy()
 
+    # Includes information about the animal, day, epoch in index
+    (replay_info['animal'], replay_info['day'],
+     replay_info['epoch']) = epoch_key
+    replay_info.reset_index().set_index(
+        ['animal', 'day', 'epoch', 'ripple_number'], inplace=True)
+
     replay_info['ripple_duration'] = (
         replay_info['end_time'] - replay_info['start_time'])
 
