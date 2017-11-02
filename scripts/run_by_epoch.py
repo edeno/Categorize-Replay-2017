@@ -75,7 +75,7 @@ def decode_replay_during_hippocampus_ripple(epoch_key):
         brain_areas='CA1')
 
     for brain_area in tetrode_info.area.dropna().unique().tolist():
-        if brain_area not in ['???', 'Reference']:
+        if brain_area not in ['???', 'Reference', 'CA1']:
             print(brain_area)
             try:
                 # Compare different types of ripples
