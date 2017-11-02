@@ -1,5 +1,6 @@
 from logging import getLogger
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import xarray as xr
@@ -55,6 +56,22 @@ def detect_epoch_ripples(epoch_key, animals, sampling_frequency,
     return Kay_ripple_detector(
         time, hippocampus_lfps.values, speed.values, sampling_frequency,
         minimum_duration=pd.Timedelta(milliseconds=15))
+
+
+def get_position_occupancy(epoch_key, animals, extent=(0, 300, 0, 300),
+                           gridsize=(30, 30)):
+    position_info = get_interpolated_position_dataframe(epoch_key, animals)
+    occupancy = plt.hexbin(
+        position_info.x_position, position_info.y_position,
+        extent=extent, gridsize=gridsize)
+    occupancy_count = pd.DataFrame(
+        {'occupancy_count':  occupancy.get_array(),
+         'center_x': occupancy.get_offsets()[:, 0],
+         'center_y': occupancy.get_offsets()[:, 1]}
+        )
+    (occupancy_count['animal'], occupancy_count['day'],
+     occupancy_count['epoch']) = epoch_key
+    return occupancy_count
 
 
 def decode_ripple_clusterless(epoch_key, animals, ripple_times,

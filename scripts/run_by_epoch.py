@@ -4,10 +4,11 @@ from signal import SIGUSR1, SIGUSR2, signal
 from subprocess import PIPE, run
 from sys import exit, stdout
 
-from loren_frank_data_processing import (get_interpolated_position_dataframe,
-                                         save_xarray, make_tetrode_dataframe)
-from src.analysis import decode_ripple_clusterless, detect_epoch_ripples
-from src.parameters import ANIMALS, PROCESSED_DATA_DIR, SAMPLING_FREQUENCY
+from loren_frank_data_processing import make_tetrode_dataframe, save_xarray
+from src.analysis import (decode_ripple_clusterless, detect_epoch_ripples,
+                          get_position_occupancy)
+from src.parameters import (ANIMALS, EXTENT, GRIDSIZE, PROCESSED_DATA_DIR,
+                            SAMPLING_FREQUENCY)
 
 
 def decode_ripples(epoch_key):
@@ -18,14 +19,16 @@ def decode_ripples(epoch_key):
     replay_info, state_probability, posterior_density = (
         decode_ripple_clusterless(epoch_key, ANIMALS, ripple_times,
                                   mark_names=None))
-
-    position_info = get_interpolated_position_dataframe(epoch_key, ANIMALS)
-    (position_info['animal'], position_info['day'],
-     position_info['epoch']) = epoch_key
+    position_occupancy = get_position_occupancy(
+        epoch_key, ANIMALS, EXTENT, GRIDSIZE)
 
     results = dict()
+    results['position_occupancy'] = (
+        position_occupancy.to_xarray().assign_attrs(
+            {'extent': EXTENT,
+             'gridsize': GRIDSIZE}))
     results['replay_info'] = replay_info.to_xarray()
-    results['position_info'] = position_info.to_xarray()
+    results['position_info'] = position_occupancy.to_xarray()
     results['state_probability'] = state_probability
     results['posterior_density'] = posterior_density
 
@@ -39,8 +42,12 @@ def decode_replay_by_brain_area(epoch_key):
 
     results = dict()
 
-    position_info = get_interpolated_position_dataframe(epoch_key, ANIMALS)
-    results['position_info'] = position_info.to_xarray()
+    position_occupancy = get_position_occupancy(
+        epoch_key, ANIMALS, EXTENT, GRIDSIZE)
+    results['position_occupancy'] = (
+        position_occupancy.to_xarray().assign_attrs(
+            {'extent': EXTENT,
+             'gridsize': GRIDSIZE}))
 
     for brain_area in tetrode_info.area.dropna().unique().tolist():
         if brain_area not in ['???', 'Reference']:

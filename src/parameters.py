@@ -44,3 +44,7 @@ COLORS = {
     'Outbound-Forward': set1[2],
     'Outbound-Reverse': set1[3],
 }
+
+# Occupancy normalized histogram parameters
+EXTENT = (0, 300, 0, 300)
+GRIDSIZE = (30, 30)
