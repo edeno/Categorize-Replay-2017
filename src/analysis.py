@@ -1,4 +1,6 @@
 from logging import getLogger
+import matplotlib
+matplotlib.use('agg')
 
 import matplotlib.pyplot as plt
 import numpy as np
