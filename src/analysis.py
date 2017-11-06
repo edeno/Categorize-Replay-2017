@@ -11,10 +11,12 @@ from scipy.stats import linregress
 from loren_frank_data_processing import (get_interpolated_position_dataframe,
                                          get_LFP_dataframe,
                                          get_multiunit_indicator_dataframe,
+                                         make_epochs_dataframe,
                                          make_tetrode_dataframe,
                                          reshape_to_segments)
 from replay_classification import ClusterlessDecoder
 from ripple_detection import Kay_ripple_detector
+
 
 logger = getLogger(__name__)
 
@@ -34,8 +36,6 @@ def detect_epoch_ripples(epoch_key, animals, sampling_frequency,
 
     tetrode_info = make_tetrode_dataframe(animals).xs(
             epoch_key, drop_level=False)
-    # Get cell-layer CA1, iCA1 LFPs
-
     brain_areas = [brain_areas] if isinstance(brain_areas, str) else brain_areas
     is_brain_areas = tetrode_info.area.isin(brain_areas)
     if 'CA1' in brain_areas:
@@ -63,14 +63,16 @@ def detect_epoch_ripples(epoch_key, animals, sampling_frequency,
 def get_position_occupancy(epoch_key, animals, extent=(0, 300, 0, 300),
                            gridsize=(30, 30)):
     position_info = get_interpolated_position_dataframe(epoch_key, animals)
+
     occupancy = plt.hexbin(
         position_info.x_position, position_info.y_position,
         extent=extent, gridsize=gridsize)
     occupancy_count = pd.DataFrame(
         {'occupancy_count':  occupancy.get_array(),
          'center_x': occupancy.get_offsets()[:, 0],
-         'center_y': occupancy.get_offsets()[:, 1]}
-        )
+         'center_y': occupancy.get_offsets()[:, 1],
+         'environment': make_epochs_dataframe(
+            animals).xs(epoch_key).environment.astype(str)})
     (occupancy_count['animal'], occupancy_count['day'],
      occupancy_count['epoch']) = epoch_key
     return occupancy_count
