@@ -23,10 +23,7 @@ def decode_ripples(epoch_key):
         epoch_key, ANIMALS, EXTENT, GRIDSIZE)
 
     results = dict()
-    results['position_occupancy'] = (
-        position_occupancy.to_xarray().assign_attrs(
-            {'extent': EXTENT,
-             'gridsize': GRIDSIZE}))
+    results['position_occupancy'] = position_occupancy.to_xarray()
     results['replay_info'] = replay_info.to_xarray()
     results['position_info'] = position_occupancy.to_xarray()
     results['state_probability'] = state_probability
@@ -44,10 +41,7 @@ def decode_replay_by_brain_area(epoch_key):
 
     position_occupancy = get_position_occupancy(
         epoch_key, ANIMALS, EXTENT, GRIDSIZE)
-    results['position_occupancy'] = (
-        position_occupancy.to_xarray().assign_attrs(
-            {'extent': EXTENT,
-             'gridsize': GRIDSIZE}))
+    results['position_occupancy'] = position_occupancy.to_xarray()
 
     for brain_area in tetrode_info.area.dropna().unique().tolist():
         if brain_area not in ['???', 'Reference']:
