@@ -197,7 +197,7 @@ def summarize_replay_results(results, ripple_times, position_info,
     # Determine whether ripple is heading towards or away from animal's
     # position
     posterior_density = xr.concat(
-        [result.posterior_density for result in results],
+        [result.results.posterior_density for result in results],
         dim=replay_info.index)
 
     replay_info['replay_motion'] = _get_replay_motion(
