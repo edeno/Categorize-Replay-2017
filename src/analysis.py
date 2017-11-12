@@ -1,7 +1,8 @@
 from logging import getLogger
+import os
 import matplotlib
-matplotlib.use('agg')
-
+if os.name == 'posix' and 'DISPLAY' not in os.environ:
+    matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
