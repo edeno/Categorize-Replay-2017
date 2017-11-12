@@ -122,7 +122,9 @@ def decode_ripple_clusterless(epoch_key, animals, ripple_times,
     decoder = ClusterlessDecoder(
         train_position_info.linear_distance.values,
         train_position_info.trajectory_direction.values,
-        training_marks
+        training_marks,
+        initial_conditions='Uniform',
+        replay_speedup_factor=16,
     ).fit()
 
     test_marks = _get_ripple_marks(marks, ripple_times)
