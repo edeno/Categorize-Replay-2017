@@ -39,9 +39,9 @@ def decode_replay_by_brain_area(epoch_key):
 
     results = dict()
 
-    position_occupancy = get_position_occupancy(
-        epoch_key, ANIMALS, EXTENT, GRIDSIZE)
-    results['position_occupancy'] = position_occupancy.to_xarray()
+    # position_occupancy = get_position_occupancy(
+    #     epoch_key, ANIMALS, EXTENT, GRIDSIZE)
+    # results['position_occupancy'] = position_occupancy.to_xarray()
 
     for brain_area in tetrode_info.area.dropna().unique().tolist():
         if brain_area not in ['???', 'Reference']:
@@ -147,8 +147,8 @@ def main():
                    stdout=PIPE, universal_newlines=True).stdout
     logger.info('Git Hash: {git_hash}'.format(git_hash=git_hash.rstrip()))
 
+    decode_ripples(epoch_key)
     decode_replay_by_brain_area(epoch_key)
-    decode_replay_during_hippocampus_ripple(epoch_key)
 
     logger.info('Finished Processing')
 
