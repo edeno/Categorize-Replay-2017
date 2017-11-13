@@ -202,7 +202,8 @@ def summarize_replay_results(results, ripple_times, position_info,
     posterior_density = xr.concat(
         [result.results.posterior_density for result in results],
         dim=replay_info.index)
-
+    posterior_density['time'] = (
+        posterior_density.time.to_index().total_seconds())
     replay_info['replay_motion'] = _get_replay_motion(
         replay_info, posterior_density)
 
@@ -278,7 +279,7 @@ def _get_replay_motion_from_rows(ripple_times, posterior_density,
     replay_distance_from_animal_position = np.abs(
         replay_position - animal_position)
     is_away = linregress(
-        posterior_density.get_index('time').total_seconds(),
+        posterior_density.get_index('time').values,
         replay_distance_from_animal_position).slope > 0
     return np.where(is_away, 'Away', 'Towards')
 
