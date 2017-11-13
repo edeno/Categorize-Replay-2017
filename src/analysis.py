@@ -16,7 +16,7 @@ from loren_frank_data_processing import (get_interpolated_position_dataframe,
                                          make_tetrode_dataframe,
                                          reshape_to_segments)
 from replay_classification import ClusterlessDecoder
-from ripple_detection import Kay_ripple_detector
+from ripple_detection import Karlsson_ripple_detector
 
 
 logger = getLogger(__name__)
@@ -56,7 +56,7 @@ def detect_epoch_ripples(epoch_key, animals, sampling_frequency,
     speed = get_interpolated_position_dataframe(
         epoch_key, animals, _time_function).speed
 
-    return Kay_ripple_detector(
+    return Karlsson_ripple_detector(
         time, hippocampus_lfps.values, speed.values, sampling_frequency,
         minimum_duration=pd.Timedelta(milliseconds=15))
 
