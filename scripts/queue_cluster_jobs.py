@@ -36,6 +36,8 @@ def main():
     # Set the maximum number of threads for openBLAS to use.
     NUM_THREADS = 16
     environ['OPENBLAS_NUM_THREADS'] = str(NUM_THREADS)
+    environ['NUMBA_NUM_THREADS'] = str(NUM_THREADS)
+    environ['OMP_NUM_THREADS'] = str(NUM_THREADS)
     log_directory = join(getcwd(), 'logs')
     makedirs(log_directory,  exist_ok=True)
 
@@ -43,7 +45,8 @@ def main():
     directives = ' '.join(
         ['-l h_rt=1:00:00', '-pe omp {0}'.format(NUM_THREADS),
          '-P braincom', '-notify', '-l mem_total=125G',
-         '-v OPENBLAS_NUM_THREADS'])
+         '-v OPENBLAS_NUM_THREADS', '-v NUMBA_NUM_THREADS',
+         '-v OMP_NUM_THREADS'])
 
     args = get_command_line_arguments()
     if args.Animal is None and args.Day is None and args.Epoch is None:
