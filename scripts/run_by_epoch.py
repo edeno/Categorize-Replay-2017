@@ -3,6 +3,7 @@ from logging import DEBUG, INFO, Formatter, StreamHandler, getLogger
 from signal import SIGUSR1, SIGUSR2, signal
 from subprocess import PIPE, run
 from sys import exit, stdout
+from os import environ
 
 from loren_frank_data_processing import make_tetrode_dataframe, save_xarray
 from src.analysis import (decode_ripple_clusterless, detect_epoch_ripples,
@@ -146,6 +147,9 @@ def main():
     git_hash = run(['git', 'rev-parse', 'HEAD'],
                    stdout=PIPE, universal_newlines=True).stdout
     logger.info('Git Hash: {git_hash}'.format(git_hash=git_hash.rstrip()))
+    if 'OPENBLAS_NUM_THREADS' in environ:
+        logger.info('OpenBlAS threads: {n_threads}'.format(
+            n_threads=environ['OPENBLAS_NUM_THREADS']))
 
     decode_ripples(epoch_key)
     decode_replay_by_brain_area(epoch_key)
