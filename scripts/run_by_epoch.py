@@ -152,7 +152,6 @@ def main():
             n_threads=environ['OPENBLAS_NUM_THREADS']))
 
     decode_ripples(epoch_key)
-    decode_replay_by_brain_area(epoch_key)
 
     logger.info('Finished Processing')
 
