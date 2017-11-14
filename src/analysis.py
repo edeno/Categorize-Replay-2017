@@ -72,8 +72,8 @@ def get_position_occupancy(epoch_key, animals, extent=(0, 300, 0, 300),
         {'occupancy_count':  occupancy.get_array(),
          'center_x': occupancy.get_offsets()[:, 0],
          'center_y': occupancy.get_offsets()[:, 1],
-         'environment': make_epochs_dataframe(
-            animals).xs(epoch_key).environment.astype(str)})
+         'environment': str(make_epochs_dataframe(
+            animals).xs(epoch_key).environment)})
     (occupancy_count['animal'], occupancy_count['day'],
      occupancy_count['epoch']) = epoch_key
     return occupancy_count
