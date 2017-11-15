@@ -58,7 +58,7 @@ def detect_epoch_ripples(epoch_key, animals, sampling_frequency,
 
     return Karlsson_ripple_detector(
         time, hippocampus_lfps.values, speed.values, sampling_frequency,
-        minimum_duration=pd.Timedelta(milliseconds=15))
+        minimum_duration=pd.Timedelta(milliseconds=15), zscore_threshold=3)
 
 
 def get_position_occupancy(epoch_key, animals, extent=(0, 300, 0, 300),
