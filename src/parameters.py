@@ -34,8 +34,8 @@ set1 = sns.color_palette('Set2', 4)
 COLORS = {
     'Forward': hls[0],
     'Reverse': hls[1],
-    'Inbound': hls[2],
-    'Outbound': hls[3],
+    'inbound': hls[2],
+    'outbound': hls[3],
     'Towards': hls[4],
     'Away': hls[5],
     'Unclassified': 'lightgrey',
