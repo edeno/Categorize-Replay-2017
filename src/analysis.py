@@ -192,7 +192,6 @@ def summarize_replay_results(results, ripple_times, position_info,
     replay_info = pd.concat(
         [replay_info,
          position_info.loc[replay_info.start_time]
-         .drop('trajectory_category_ind', axis=1)
          .set_index(replay_info.index)
          ], axis=1)
 
