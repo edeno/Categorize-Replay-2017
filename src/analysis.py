@@ -97,7 +97,7 @@ def decode_ripple_clusterless(epoch_key, animals, ripple_times,
         ~tetrode_info.descrip.str.startswith('Ref').fillna(False)]
     logger.debug(brain_areas_tetrodes.loc[:, ['area', 'depth', 'descrip']])
 
-    position_info = get_interpolated_position_dataframe(epoch_key, animals)
+    position_info = get_interpolated_position_dataframe(epoch_key, animals, 5)
 
     if mark_names is None:
         # Use all available mark dimensions
