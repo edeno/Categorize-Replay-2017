@@ -47,4 +47,4 @@ COLORS = {
 
 # Occupancy normalized histogram parameters
 EXTENT = (0, 300, 0, 300)
-GRIDSIZE = (60, 60)
+GRIDSIZE = (45, 45)
