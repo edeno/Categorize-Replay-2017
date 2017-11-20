@@ -108,14 +108,15 @@ def decode_ripple_clusterless(epoch_key, animals, ripple_times,
         mark_names = [mark_name for mark_name in mark_names
                       if mark_name not in ['x_position', 'y_position']]
 
+    is_training = (position_info.speed > 4) & position_info.is_correct
     marks = [(get_multiunit_indicator_dataframe(tetrode_key, animals)
               .loc[:, mark_names])
              for tetrode_key in brain_areas_tetrodes.index]
     marks = [tetrode_marks for tetrode_marks in marks
-             if (tetrode_marks.loc[position_info.speed > 4, :].dropna()
+             if (tetrode_marks.loc[is_training].dropna()
                  .shape[0]) != 0]
 
-    train_position_info = position_info.query('speed > 4')
+    train_position_info = position_info.loc[is_training]
 
     training_marks = np.stack([
         tetrode_marks.loc[train_position_info.index, mark_names]
