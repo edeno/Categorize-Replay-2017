@@ -54,7 +54,7 @@ def detect_epoch_ripples(epoch_key, animals, sampling_frequency,
         return time
 
     speed = get_interpolated_position_dataframe(
-        epoch_key, animals, _time_function).speed
+        epoch_key, animals, _time_function, max_distance_from_well=5).speed
 
     return Karlsson_ripple_detector(
         time, hippocampus_lfps.values, speed.values, sampling_frequency,
@@ -63,7 +63,8 @@ def detect_epoch_ripples(epoch_key, animals, sampling_frequency,
 
 def get_position_occupancy(epoch_key, animals, extent=(0, 300, 0, 300),
                            gridsize=(30, 30)):
-    position_info = get_interpolated_position_dataframe(epoch_key, animals)
+    position_info = get_interpolated_position_dataframe(
+        epoch_key, animals, max_distance_from_well=5)
 
     occupancy = plt.hexbin(
         position_info.x_position, position_info.y_position,
@@ -97,7 +98,8 @@ def decode_ripple_clusterless(epoch_key, animals, ripple_times,
         ~tetrode_info.descrip.str.startswith('Ref').fillna(False)]
     logger.debug(brain_areas_tetrodes.loc[:, ['area', 'depth', 'descrip']])
 
-    position_info = get_interpolated_position_dataframe(epoch_key, animals, 5)
+    position_info = get_interpolated_position_dataframe(
+        epoch_key, animals, max_distance_from_well=5)
 
     if mark_names is None:
         # Use all available mark dimensions
