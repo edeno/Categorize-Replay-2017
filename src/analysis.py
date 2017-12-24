@@ -1,8 +1,11 @@
-from logging import getLogger
 import os
+from logging import getLogger
+
 import matplotlib
+
 if os.name == 'posix' and 'DISPLAY' not in os.environ:
     matplotlib.use('Agg')
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -17,7 +20,6 @@ from loren_frank_data_processing import (get_interpolated_position_dataframe,
                                          reshape_to_segments)
 from replay_classification import ClusterlessDecoder
 from ripple_detection import Karlsson_ripple_detector
-
 
 logger = getLogger(__name__)
 
@@ -36,8 +38,9 @@ def detect_epoch_ripples(epoch_key, animals, sampling_frequency,
     logger.info('Detecting ripples')
 
     tetrode_info = make_tetrode_dataframe(animals).xs(
-            epoch_key, drop_level=False)
-    brain_areas = [brain_areas] if isinstance(brain_areas, str) else brain_areas
+        epoch_key, drop_level=False)
+    brain_areas = [brain_areas] if isinstance(
+        brain_areas, str) else brain_areas
     is_brain_areas = tetrode_info.area.isin(brain_areas)
     if 'CA1' in brain_areas:
         is_brain_areas = is_brain_areas & (
@@ -74,7 +77,7 @@ def get_position_occupancy(epoch_key, animals, extent=(0, 300, 0, 300),
          'center_x': occupancy.get_offsets()[:, 0],
          'center_y': occupancy.get_offsets()[:, 1],
          'environment': str(make_epochs_dataframe(
-            animals).xs(epoch_key).environment)})
+             animals).xs(epoch_key).environment)})
     (occupancy_count['animal'], occupancy_count['day'],
      occupancy_count['epoch']) = epoch_key
     return occupancy_count
@@ -90,7 +93,8 @@ def decode_ripple_clusterless(epoch_key, animals, ripple_times,
     logger.info('Decoding ripples')
     tetrode_info = make_tetrode_dataframe(animals).xs(
         epoch_key, drop_level=False)
-    brain_areas = [brain_areas] if isinstance(brain_areas, str) else brain_areas
+    brain_areas = [brain_areas] if isinstance(
+        brain_areas, str) else brain_areas
     is_brain_areas = tetrode_info.area.isin(brain_areas)
     brain_areas_tetrodes = tetrode_info[
         is_brain_areas &
