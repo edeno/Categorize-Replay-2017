@@ -13,13 +13,13 @@ import xarray as xr
 from scipy.stats import linregress
 
 from loren_frank_data_processing import (get_interpolated_position_dataframe,
-                                         get_LFP_dataframe,
+                                         get_LFPs,
                                          get_multiunit_indicator_dataframe,
                                          make_epochs_dataframe,
                                          make_tetrode_dataframe,
                                          reshape_to_segments)
 from replay_classification import ClusterlessDecoder
-from ripple_detection import Karlsson_ripple_detector
+from ripple_detection import Kay_ripple_detector
 
 logger = getLogger(__name__)
 
@@ -48,20 +48,16 @@ def detect_epoch_ripples(epoch_key, animals, sampling_frequency,
     logger.debug(tetrode_info[is_brain_areas]
                  .loc[:, ['area', 'depth', 'descrip']])
     tetrode_keys = tetrode_info[is_brain_areas].index.tolist()
-    hippocampus_lfps = pd.concat(
-        [get_LFP_dataframe(tetrode_key, animals)
-         for tetrode_key in tetrode_keys], axis=1)
-    time = hippocampus_lfps.index
-
-    def _time_function(epoch_key, animals):
-        return time
+    LFPs = get_LFPs(tetrode_keys, animals)
 
     speed = get_interpolated_position_dataframe(
-        epoch_key, animals, _time_function, max_distance_from_well=5).speed
+        epoch_key, animals, max_distance_from_well=5).speed
+    not_null = np.any(pd.notnull(LFPs), axis=1) & pd.notnull(speed)
 
-    return Karlsson_ripple_detector(
-        time, hippocampus_lfps.values, speed.values, sampling_frequency,
-        minimum_duration=pd.Timedelta(milliseconds=15), zscore_threshold=3)
+    return Kay_ripple_detector(
+        LFPs.index[not_null], LFPs.values[not_null], speed.values[not_null],
+        sampling_frequency, minimum_duration=pd.Timedelta(milliseconds=15),
+        zscore_threshold=3)
 
 
 def get_position_occupancy(epoch_key, animals, extent=(0, 300, 0, 300),
