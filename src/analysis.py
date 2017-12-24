@@ -133,9 +133,9 @@ def decode_ripple_clusterless(epoch_key, animals, ripple_times,
         replay_speedup_factor=16,
     ).fit()
 
-    test_marks = _get_ripple_marks(marks, ripple_times)
+    test_marks = _get_ripple_marks(marks, ripple_times, sampling_frequency)
     logger.info('Predicting replay types')
-    results = [decoder.predict(ripple_marks, time)
+    results = [decoder.predict(ripple_marks, time.total_seconds())
                for ripple_marks, time in test_marks]
 
     return summarize_replay_results(
@@ -299,9 +299,9 @@ def _get_replay_motion(ripple_times, posterior_density,
          in zip(ripple_times.iterrows(), posterior_density)]).squeeze()
 
 
-def _get_ripple_marks(marks, ripple_times):
+def _get_ripple_marks(marks, ripple_times, sampling_frequency):
     mark_ripples = [reshape_to_segments(
-        tetrode_marks, ripple_times,
+        tetrode_marks, ripple_times, sampling_frequency=sampling_frequency,
         axis=0)
         for tetrode_marks in marks]
 
