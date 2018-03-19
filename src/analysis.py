@@ -1,10 +1,4 @@
-import os
 from logging import getLogger
-
-import matplotlib
-
-if os.name == 'posix' and 'DISPLAY' not in os.environ:
-    matplotlib.use('Agg')
 
 import matplotlib.pyplot as plt
 import numpy as np
