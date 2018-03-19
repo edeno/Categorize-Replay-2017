@@ -49,15 +49,15 @@ def detect_epoch_ripples(epoch_key, animals, sampling_frequency,
             tetrode_info.descrip.isin(['riptet']) | tetrode_info.validripple)
     logger.debug(tetrode_info[is_brain_areas]
                  .loc[:, ['area', 'depth', 'descrip']])
-    tetrode_keys = tetrode_info[is_brain_areas].index.tolist()
-    LFPs = get_LFPs(tetrode_keys, animals)
+    tetrode_keys = tetrode_info[is_brain_areas].index
+    lfps = get_LFPs(tetrode_keys, animals)
+    time = lfps.index
 
     speed = get_interpolated_position_dataframe(
-        epoch_key, animals, max_distance_from_well=5).speed
-    not_null = np.any(pd.notnull(LFPs), axis=1) & pd.notnull(speed)
+        epoch_key, animals).speed
 
     return Kay_ripple_detector(
-        LFPs.index[not_null], LFPs.values[not_null], speed.values[not_null],
+        time, lfps.values, speed.values, sampling_frequency,
         minimum_duration=minimum_duration, zscore_threshold=zscore_threshold)
 
 
