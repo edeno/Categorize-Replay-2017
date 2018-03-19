@@ -15,6 +15,7 @@ from scipy.stats import linregress
 from loren_frank_data_processing import (get_interpolated_position_dataframe,
                                          get_LFPs,
                                          get_multiunit_indicator_dataframe,
+                                         get_spike_indicator_dataframe,
                                          get_trial_time, make_epochs_dataframe,
                                          make_tetrode_dataframe,
                                          reshape_to_segments)
@@ -146,6 +147,75 @@ def decode_ripple_clusterless(epoch_key, animals, ripple_times,
     results = [decoder.predict(ripple_marks, time.total_seconds())
                for ripple_marks, time in test_marks]
 
+    return summarize_replay_results(
+        results, ripple_times, position_info, epoch_key)
+
+
+def decode_ripple_sorted_spikes(epoch_key, animals, ripple_times,
+                                position_info, neuron_info,
+                                sampling_frequency=1500,
+                                n_position_bins=61):
+    '''Labels the ripple by category
+
+    Parameters
+    ----------
+    epoch_key : 3-element tuple
+        Specifies which epoch to run.
+        (Animal short name, day, epoch_number)
+    animals : list of named-tuples
+        Tuples give information to convert from the animal short name
+        to a data directory
+    ripple_times : list of 2-element tuples
+        The first element of the tuple is the start time of the ripple.
+        Second element of the tuple is the end time of the ripple
+    sampling_frequency : int, optional
+        Sampling frequency of the spikes
+    n_position_bins : int, optional
+        Number of bins for the linear distance
+
+    Returns
+    -------
+    ripple_info : pandas dataframe
+        Dataframe containing the categories for each ripple
+        and the probability of that category
+
+    '''
+    logger.info('Decoding ripples')
+    # Include only CA1 neurons with spikes
+    tetrode_info = make_tetrode_dataframe(animals).xs(
+        epoch_key, drop_level=False)
+    neuron_info = pd.merge(tetrode_info, neuron_info.copy(),
+                           on=['animal', 'day', 'epoch',
+                               'tetrode_number', 'area'],
+                           how='right', right_index=True).set_index(
+        neuron_info.index)
+    neuron_info = neuron_info[
+        neuron_info.area.isin(['CA1', 'iCA1', 'CA3']) &
+        (neuron_info.numspikes > 0)]
+    logger.debug(neuron_info.loc[:, ['area', 'numspikes']])
+    position_info['lagged_linear_distance'] = (
+        position_info.linear_distance.shift(1))
+
+    # Train on when the rat is moving
+    spikes_data = [get_spike_indicator_dataframe(neuron_key, animals)
+                   for neuron_key in neuron_info.index]
+
+    ripple_indicator = get_ripple_indicator(epoch_key, animals, ripple_times)
+    train_position_info = position_info.loc[
+        ~ripple_indicator & position_info.is_correct]
+    train_spikes_data = np.stack([spikes_datum.loc[train_position_info.index]
+                                  for spikes_datum in spikes_data], axis=0)
+    decoder = SortedSpikeDecoder(
+        position=train_position_info.linear_distance.values,
+        lagged_position=train_position_info.lagged_linear_distance.values,
+        spikes=train_spikes_data,
+        trajectory_direction=train_position_info.task.values
+    ).fit()
+
+    test_spikes = _get_ripple_spikes(
+        spikes_data, ripple_times, sampling_frequency)
+    results = [decoder.predict(ripple_spikes, time.total_seconds())
+               for ripple_spikes, time in test_spikes]
     return summarize_replay_results(
         results, ripple_times, position_info, epoch_key)
 
@@ -318,6 +388,23 @@ def _get_ripple_marks(marks, ripple_times, sampling_frequency):
              mark_ripples[0].loc[ripple_number, :]
              .index.get_level_values('time'))
             for ripple_number in ripple_times.index]
+
+
+def _get_ripple_spikes(spikes_data, ripple_times, sampling_frequency):
+    '''Given the ripple times, extract the spikes within the ripple
+    '''
+    spike_ripples = [reshape_to_segments(
+        spikes_datum, ripple_times, axis=0,
+        sampling_frequency=sampling_frequency)
+        for spikes_datum in spikes_data]
+
+    return [
+        (np.stack([df.loc[ripple_number, :].values
+                   for df in spike_ripples], axis=0).squeeze(),
+         spike_ripples[0].loc[ripple_number, :].index.get_level_values('time'))
+        for ripple_number in ripple_times.index]
+
+
 def get_ripple_indicator(epoch_key, animals, ripple_times):
     time = get_trial_time(epoch_key, animals)
     ripple_indicator = pd.Series(np.zeros_like(time, dtype=bool), index=time)
