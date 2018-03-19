@@ -15,7 +15,7 @@ from scipy.stats import linregress
 from loren_frank_data_processing import (get_interpolated_position_dataframe,
                                          get_LFPs,
                                          get_multiunit_indicator_dataframe,
-                                         make_epochs_dataframe,
+                                         get_trial_time, make_epochs_dataframe,
                                          make_tetrode_dataframe,
                                          reshape_to_segments)
 from replay_classification import ClusterlessDecoder
@@ -81,10 +81,12 @@ def get_position_occupancy(epoch_key, animals, extent=(0, 300, 0, 300),
 
 
 def decode_ripple_clusterless(epoch_key, animals, ripple_times,
+                              position_info,
                               sampling_frequency=1500,
-                              n_place_bins=61,
+                              n_position_bins=61,
                               place_std_deviation=None,
                               mark_std_deviation=20,
+                              confidence_threshold=0.8,
                               mark_names=_MARKS,
                               brain_areas=_BRAIN_AREAS):
     logger.info('Decoding ripples')
@@ -99,9 +101,6 @@ def decode_ripple_clusterless(epoch_key, animals, ripple_times,
         ~tetrode_info.descrip.str.startswith('Ref').fillna(False)]
     logger.debug(brain_areas_tetrodes.loc[:, ['area', 'depth', 'descrip']])
 
-    position_info = get_interpolated_position_dataframe(
-        epoch_key, animals, max_distance_from_well=5)
-
     if mark_names is None:
         # Use all available mark dimensions
         mark_names = get_multiunit_indicator_dataframe(
@@ -109,25 +108,37 @@ def decode_ripple_clusterless(epoch_key, animals, ripple_times,
         mark_names = [mark_name for mark_name in mark_names
                       if mark_name not in ['x_position', 'y_position']]
 
-    is_training = (position_info.speed > 4) & position_info.is_correct
     marks = [(get_multiunit_indicator_dataframe(tetrode_key, animals)
               .loc[:, mark_names])
              for tetrode_key in brain_areas_tetrodes.index]
     marks = [tetrode_marks for tetrode_marks in marks
-             if (tetrode_marks.loc[is_training].dropna()
+             if (tetrode_marks.loc[position_info.speed > 4, :].dropna()
                  .shape[0]) != 0]
 
-    train_position_info = position_info.loc[is_training]
+    position_info['lagged_linear_distance'] = (
+        position_info.linear_distance.shift(1))
+    KEEP_COLUMNS = ['linear_distance', 'lagged_linear_distance', 'task',
+                    'is_correct', 'turn', 'speed']
+    position_info = position_info.loc[:, KEEP_COLUMNS].dropna()
+
+    ripple_indicator = get_ripple_indicator(epoch_key, animals, ripple_times)
+    train_position_info = position_info.loc[
+        ~ripple_indicator & position_info.is_correct]
 
     training_marks = np.stack([
         tetrode_marks.loc[train_position_info.index, mark_names]
         for tetrode_marks in marks], axis=0)
 
     decoder = ClusterlessDecoder(
-        train_position_info.linear_distance.values,
-        train_position_info.task.values,
-        training_marks,
+        position=train_position_info.linear_distance.values,
+        lagged_position=train_position_info.lagged_linear_distance.values,
+        trajectory_direction=train_position_info.task.values,
+        spike_marks=training_marks,
+        n_position_bins=n_position_bins,
+        place_std_deviation=place_std_deviation,
+        mark_std_deviation=mark_std_deviation,
         replay_speedup_factor=16,
+        confidence_threshold=confidence_threshold,
     ).fit()
 
     test_marks = _get_ripple_marks(marks, ripple_times, sampling_frequency)
@@ -307,3 +318,10 @@ def _get_ripple_marks(marks, ripple_times, sampling_frequency):
              mark_ripples[0].loc[ripple_number, :]
              .index.get_level_values('time'))
             for ripple_number in ripple_times.index]
+def get_ripple_indicator(epoch_key, animals, ripple_times):
+    time = get_trial_time(epoch_key, animals)
+    ripple_indicator = pd.Series(np.zeros_like(time, dtype=bool), index=time)
+    for _, start_time, end_time in ripple_times.itertuples():
+        ripple_indicator[start_time:end_time] = True
+
+    return ripple_indicator
