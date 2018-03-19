@@ -29,7 +29,9 @@ _BRAIN_AREAS = ['CA1', 'iCA1', 'CA3']
 
 
 def detect_epoch_ripples(epoch_key, animals, sampling_frequency,
-                         brain_areas=_BRAIN_AREAS):
+                         brain_areas=_BRAIN_AREAS,
+                         minimum_duration=pd.Timedelta(milliseconds=15),
+                         zscore_threshold=2):
     '''Returns a list of tuples containing the start and end times of
     ripples. Candidate ripples are computed via the ripple detection
     function and then filtered to exclude ripples where the animal was
@@ -56,8 +58,7 @@ def detect_epoch_ripples(epoch_key, animals, sampling_frequency,
 
     return Kay_ripple_detector(
         LFPs.index[not_null], LFPs.values[not_null], speed.values[not_null],
-        sampling_frequency, minimum_duration=pd.Timedelta(milliseconds=15),
-        zscore_threshold=3)
+        minimum_duration=minimum_duration, zscore_threshold=zscore_threshold)
 
 
 def get_position_occupancy(epoch_key, animals, extent=(0, 300, 0, 300),
