@@ -19,7 +19,7 @@ from loren_frank_data_processing import (get_interpolated_position_dataframe,
                                          get_trial_time, make_epochs_dataframe,
                                          make_tetrode_dataframe,
                                          reshape_to_segments)
-from replay_classification import ClusterlessDecoder
+from replay_classification import ClusterlessDecoder, SortedSpikeDecoder
 from ripple_detection import Kay_ripple_detector
 
 logger = getLogger(__name__)
