@@ -246,9 +246,8 @@ def summarize_replay_results(results, ripple_times, position_info,
      replay_info['epoch']) = epoch_key
     replay_info = replay_info.reset_index()
 
-    replay_info['ripple_duration'] = ((
-        replay_info['end_time'] - replay_info['start_time']) /
-        np.timedelta64(1, 's'))
+    replay_info['ripple_duration'] = (
+        replay_info['end_time'] - replay_info['start_time'])
 
     # Add decoded states and probability of state
     replay_info['predicted_state'] = [
@@ -286,7 +285,6 @@ def summarize_replay_results(results, ripple_times, position_info,
     posterior_density = xr.concat(
         [result.results.posterior_density for result in results],
         dim=replay_info.index)
-    posterior_density['time'] = posterior_density.time.to_index()
     replay_info['replay_motion'] = _get_replay_motion(
         replay_info, posterior_density)
 
